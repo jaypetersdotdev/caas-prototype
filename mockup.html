@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CaaS - Chat as a Service</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen overflow-hidden">
+    <!-- Mobile overlay & drawer -->
+    <div id="mobile-overlay" class="fixed inset-0 bg-black/40 z-30 hidden"></div>
+    <div id="mobile-drawer" class="fixed inset-y-0 left-0 w-72 bg-white z-40 transform -translate-x-full transition-transform md:hidden flex flex-col border-r border-gray-200">
+      <div id="mobile-drawer-content" class="flex-1 overflow-y-auto"></div>
+    </div>
+    <div class="flex h-full">
+        <!-- Left Sidebar: "The Office" -->
+        <div class="hidden md:flex md:w-1/5 flex-shrink-0 bg-white border-r border-gray-200 flex-col min-h-0 overflow-y-auto">
+            <div id="sidebar-content">
+                <!-- New Chat Button -->
+                <div class="p-4 border-b border-gray-200">
+                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-sm transition-colors">
+                        ✨ New Chat
+                    </button>
+                </div>
+
+                <!-- Persona Selector -->
+                <div class="flex-1 overflow-y-auto">
+                    <div class="p-4">
+                        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Expert Personas</h2>
+                        <div class="space-y-2" id="persona-list">
+                            <!-- Personas will be added here -->
+                        </div>
+                    </div>
+
+                    <!-- Chat History -->
+                    <div class="p-4 border-t border-gray-200">
+                        <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Recent Chats</h2>
+                        <div class="space-y-2">
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">📈</div>
+                                    <span class="text-sm font-medium text-gray-700">Growth Marketer</span>
+                                </div>
+                                <p class="text-xs text-gray-500 truncate">Campaign ideas for Q1...</p>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">💼</div>
+                                    <span class="text-sm font-medium text-gray-700">Product Manager</span>
+                                </div>
+                                <p class="text-xs text-gray-500 truncate">Feature prioritization...</p>
+                            </div>
+                            <div class="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <div class="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">💰</div>
+                                    <span class="text-sm font-medium text-gray-700">Sales Lead</span>
+                                </div>
+                                <p class="text-xs text-gray-500 truncate">Cold email templates...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel: "The Meeting Room" -->
+        <div class="flex-1 min-w-0 bg-gray-50 flex flex-col">
+            <!-- Header -->
+            <div class="bg-white border-b border-gray-200 p-4 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="hamburger" class="md:hidden mr-2 p-2 rounded-lg border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Open menu">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M3 5h14a1 1 0 100-2H3a1 1 0 100 2zm14 4H3a1 1 0 000 2h14a1 1 0 100-2zm0 6H3a1 1 0 000 2h14a1 1 0 100-2z" clip-rule="evenodd" />
+                          </svg>
+                        </button>
+                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white text-lg">📈</div>
+                        <div>
+                            <h1 class="text-lg font-semibold text-gray-800">Growth Marketer</h1>
+                            <p class="text-xs text-gray-500">Your go-to for customer acquisition & branding</p>
+                        </div>
+                    </div>
+                    <div>
+                        <select class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option>GPT-4</option>
+                            <option>Claude 3.5</option>
+                            <option>Gemini Pro</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conversation Area -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-4" id="conversation">
+                <!-- Messages will be added here -->
+            </div>
+
+            <!-- Input Field -->
+            <div class="bg-white border-t border-gray-200 p-4">
+                <div class="flex gap-3">
+                    <input 
+                        type="text" 
+                        placeholder="Ask your Growth Marketer anything..."
+                        class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+                        Send →
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar: "The Briefcase" -->
+        <div class="hidden lg:flex lg:w-1/5 flex-shrink-0 bg-white border-l border-gray-200 flex-col overflow-y-auto">
+            <div id="rightbar-content">
+            <!-- Business Profile -->
+            <div class="p-4 border-b border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    🏢 Business Profile
+                </h2>
+                <div class="bg-blue-50 rounded-lg p-4 space-y-3">
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Company</p>
+                        <p class="text-sm text-gray-800 font-semibold">TechStart Inc.</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Industry</p>
+                        <p class="text-sm text-gray-800">SaaS / B2B</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Stage</p>
+                        <p class="text-sm text-gray-800">Early Stage (Pre-Seed)</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Target Market</p>
+                        <p class="text-sm text-gray-800">Small businesses & startups</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 font-medium">Current Focus</p>
+                        <p class="text-sm text-gray-800">Product-market fit, early customer acquisition</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Artifacts/Documents -->
+            <div class="p-4 flex-1">
+                <h2 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    📁 Saved Artifacts
+                </h2>
+                <div class="space-y-2">
+                    <div class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex items-start gap-2">
+                            <div class="w-8 h-8 bg-purple-100 rounded flex items-center justify-center text-lg flex-shrink-0">📄</div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-medium text-gray-800 truncate">Q1 Marketing Plan</h3>
+                                <p class="text-xs text-gray-500">Generated 2 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex items-start gap-2">
+                            <div class="w-8 h-8 bg-blue-100 rounded flex items-center justify-center text-lg flex-shrink-0">📊</div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-medium text-gray-800 truncate">Feature Roadmap</h3>
+                                <p class="text-xs text-gray-500">Generated yesterday</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex items-start gap-2">
+                            <div class="w-8 h-8 bg-green-100 rounded flex items-center justify-center text-lg flex-shrink-0">✉️</div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-medium text-gray-800 truncate">Cold Email Templates</h3>
+                                <p class="text-xs text-gray-500">Generated 3 days ago</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow cursor-pointer">
+                        <div class="flex items-start gap-2">
+                            <div class="w-8 h-8 bg-amber-100 rounded flex items-center justify-center text-lg flex-shrink-0">💵</div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-sm font-medium text-gray-800 truncate">Cash Flow Projection</h3>
+                                <p class="text-xs text-gray-500">Generated last week</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add personas dynamically
+        const personas = [
+            {
+                icon: '📈',
+                title: 'Growth Marketer',
+                description: 'Customer acquisition, branding & content strategy',
+                color: 'purple',
+                active: true
+            },
+            {
+                icon: '⚙️',
+                title: 'Tech Co-founder (CTO)',
+                description: 'Technical decisions & architecture planning',
+                color: 'indigo',
+                active: false
+            },
+            {
+                icon: '💼',
+                title: 'Product Manager',
+                description: 'Product roadmaps & feature prioritization',
+                color: 'blue',
+                active: false
+            },
+            {
+                icon: '💰',
+                title: 'Sales Lead',
+                description: 'Revenue generation & sales strategy',
+                color: 'green',
+                active: false
+            },
+            {
+                icon: '📊',
+                title: 'Finance Manager (CFO)',
+                description: 'Financial planning, budgeting & metrics',
+                color: 'amber',
+                active: false
+            }
+        ];
+
+        const personaList = document.getElementById('persona-list');
+        personas.forEach(persona => {
+            const activeClass = persona.active ? 'bg-blue-50 border-blue-500' : 'bg-white border-gray-200';
+            const personaDiv = document.createElement('div');
+            personaDiv.className = `p-3 border-2 ${activeClass} rounded-lg hover:shadow-md transition-all cursor-pointer`;
+            personaDiv.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 bg-${persona.color}-500 rounded-full flex items-center justify-center text-white text-lg flex-shrink-0">
+                        ${persona.icon}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-sm font-semibold text-gray-800">${persona.title}</h3>
+                        <p class="text-xs text-gray-600 mt-1">${persona.description}</p>
+                    </div>
+                </div>
+            `;
+            personaList.appendChild(personaDiv);
+        });
+
+        // Add sample conversation
+        const messages = [
+            {
+                type: 'user',
+                text: "Hi! I need help developing a marketing strategy for our new SaaS product. We're targeting small businesses and have a limited budget."
+            },
+            {
+                type: 'ai',
+                text: "Great question! Given your target market and budget constraints, I'd recommend focusing on three high-impact, low-cost strategies:\n\n1. **Content Marketing & SEO**: Create blog posts and guides that solve specific problems your target customers face. This builds organic traffic over time.\n\n2. **Community Engagement**: Join relevant online communities (Reddit, Facebook groups, LinkedIn) where small business owners hang out. Provide genuine value first.\n\n3. **Partnership Marketing**: Identify complementary tools and services that serve your audience. Cross-promote to share customer bases.\n\nWould you like me to dive deeper into any of these strategies?"
+            },
+            {
+                type: 'user',
+                text: "Yes! Can you help me outline a content marketing plan? What topics should I focus on?"
+            },
+            {
+                type: 'ai',
+                text: "Absolutely! Here's a content strategy framework:\n\n**Month 1-2: Problem-Aware Content**\n- \"5 Common Challenges Small Businesses Face with [Your Domain]\"\n- \"Why Traditional [Solution] Doesn't Work for Startups\"\n- \"The Real Cost of [Problem Your Product Solves]\"\n\n**Month 3-4: Solution-Aware Content**\n- \"How to Choose the Right [Product Category]\"\n- \"DIY vs. Software: A Cost-Benefit Analysis\"\n- \"Case Study: How [Customer Type] Saves Time with [Solution]\"\n\n**Ongoing: SEO-Focused How-To Guides**\n- Target long-tail keywords like \"how to [specific task] for small business\"\n\nI can help you draft any of these pieces. Which topic resonates most with your current needs?"
+            }
+        ];
+
+        const conversation = document.getElementById('conversation');
+        messages.forEach(message => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = message.type === 'user' 
+                ? 'bg-blue-600 text-white rounded-2xl rounded-tr-sm px-5 py-3 max-w-lg shadow-sm'
+                : 'bg-white text-gray-800 rounded-2xl rounded-tl-sm px-5 py-3 max-w-xl shadow-sm border border-gray-200';
+            
+            bubble.innerHTML = `<p class="text-sm leading-relaxed whitespace-pre-line">${message.text}</p>`;
+            messageDiv.appendChild(bubble);
+            conversation.appendChild(messageDiv);
+        });
+    </script>
+    <script>
+    // Clone sidebar content into mobile drawer
+    const sidebarContent = document.getElementById('sidebar-content');
+    const rightbarContent = document.getElementById('rightbar-content');
+    const mobileDrawerContent = document.getElementById('mobile-drawer-content');
+    if (sidebarContent && mobileDrawerContent) {
+      let combined = sidebarContent.innerHTML;
+      if (rightbarContent) {
+        combined += '<div class="border-t border-gray-200 my-4"></div>' + rightbarContent.innerHTML;
+      }
+      mobileDrawerContent.innerHTML = combined;
+    }
+
+    // Mobile drawer toggle logic
+    const hamburgerBtn = document.getElementById('hamburger');
+    const mobileDrawer = document.getElementById('mobile-drawer');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+
+    function openDrawer() {
+      mobileDrawer.classList.remove('-translate-x-full');
+      mobileOverlay.classList.remove('hidden');
+    }
+    function closeDrawer() {
+      mobileDrawer.classList.add('-translate-x-full');
+      mobileOverlay.classList.add('hidden');
+    }
+
+    if (hamburgerBtn) {
+      hamburgerBtn.addEventListener('click', openDrawer);
+    }
+    if (mobileOverlay) {
+      mobileOverlay.addEventListener('click', closeDrawer);
+    }
+
+    // Close on ESC
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+    </script>
+</body>
+</html>
+
